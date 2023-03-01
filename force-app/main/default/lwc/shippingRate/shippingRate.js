@@ -17,13 +17,10 @@ export default class ShippingRate extends LightningElement {
     
     isInit = false;
     connectedCallback(){
-        debugger;
         if(this.isInit){
             return;
         }
         this.isInit = true;
-        debugger;
-
     }
 
     getShippingRatesJS(){
@@ -32,22 +29,38 @@ export default class ShippingRate extends LightningElement {
         .then(result =>{
             let jsonRes = result;
             console.log(jsonRes);
-            let response = JSON.parse(jsonRes.response);
-            if(response.errors && response.errors.length){
+            if(jsonRes.isSuccess){
+                let response = JSON.parse(jsonRes.response);
+                if(response.errors && response.errors.length){
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Error',
+                            message: response.errors[0].message,
+                            variant: 'error'
+                        })
+                    );
+                }else{
+                    this.rateReplyDetails = response.output.rateReplyDetails;
+                }
+            }else{
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Error',
-                        message: response.errors[0].message,
+                        message: jsonRes.response,
                         variant: 'error'
                     })
                 );
-            }else{
-                this.rateReplyDetails = response.output.rateReplyDetails;
             }
         })
         .catch(result => {
             console.log(result);
-            console.log('shipperrrrttttt');
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: result.message,
+                    variant: 'error'
+                })
+            );
         });
     }
 
